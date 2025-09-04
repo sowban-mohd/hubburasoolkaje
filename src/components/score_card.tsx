@@ -9,27 +9,52 @@ export default function ScoreCard({
   yaqoothScore: number;
   marjaanScore: number;
 }) {
-  // Decide which team is on top
+  const yaqoothTeam = { name: "Yaqooth", score: yaqoothScore, img: yaqoothImg, bg: "#facc15", fg: "black" , width : 180, height : 140, imagePadding : "0.20rem"};
+  const marjaanTeam = { name: "Marjaan", score: marjaanScore, img: marjaanImg, bg: "#16a34a", fg: "white", width : 180, height : 120, imagePadding : "0"};
+
   const topTeam = yaqoothScore >= marjaanScore
-    ? { name: "Yaqooth", score: yaqoothScore, img: yaqoothImg, bg: "bg-yellow-400", textColor: "text-black" }
-    : { name: "Marjaan", score: marjaanScore, img: marjaanImg, bg: "bg-green-600", textColor: "text-white" };
+    ? yaqoothTeam
+    : marjaanTeam;
 
   const bottomTeam = yaqoothScore >= marjaanScore
-    ? { name: "Marjaan", score: marjaanScore, img: marjaanImg, bg: "bg-green-600", textColor: "text-white" }
-    : { name: "Yaqooth", score: yaqoothScore, img: yaqoothImg, bg: "bg-yellow-400", textColor: "text-black" };
+    ? marjaanTeam
+    : yaqoothTeam;
+
+  const containerStyle: React.CSSProperties = {
+    width: "300px",
+    height: "400px",
+    margin: "2.5rem auto",
+    borderRadius: "1rem",
+    overflow: "hidden",
+  };
+
+  const teamStyle = (bg: string, color: string, padding : string): React.CSSProperties => ({
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "50%",
+    backgroundColor: bg,
+    color: color,
+    paddingLeft : padding
+  });
+
+  const scoreStyle: React.CSSProperties = {
+    fontSize: "2.5rem",
+    fontWeight: "bold",
+    marginTop: "0.25rem",
+  };
 
   return (
-    <div className="mx-auto mt-10 rounded-2xl overflow-hidden" style={{ width: "300px", height: "400px" }}>
-      {/* Top half */}
-      <div className={`flex flex-col justify-center items-center h-1/2 ${topTeam.bg}`}>
-        <Image src={topTeam.img} alt={`${topTeam.name} Team`} width={225} height={230} />
-        <span className={`text-5xl font-bold mt-4 ${topTeam.textColor}`}>{topTeam.score}</span>
+    <div style={containerStyle}>
+      <div style={teamStyle(topTeam.bg, topTeam.fg, topTeam.imagePadding)}>
+        <Image src={topTeam.img} alt={`${topTeam.name} Team`} width={topTeam.width} height={topTeam.height} />
+        <span style={scoreStyle}>{topTeam.score}</span>
       </div>
 
-      {/* Bottom half */}
-      <div className={`flex flex-col justify-center items-center h-1/2 ${bottomTeam.bg}`}>
-        <Image src={bottomTeam.img} alt={`${bottomTeam.name} Team`} width={225} height={225} />
-        <span className={`text-5xl font-bold mt-4 ${bottomTeam.textColor}`}>{bottomTeam.score}</span>
+      <div style={teamStyle(bottomTeam.bg, bottomTeam.fg, bottomTeam.imagePadding)}>
+        <Image src={bottomTeam.img} alt={`${bottomTeam.name} Team`} width={bottomTeam.width} height={bottomTeam.height} />
+        <span style={scoreStyle}>{bottomTeam.score}</span>
       </div>
     </div>
   );
