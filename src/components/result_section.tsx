@@ -190,6 +190,7 @@ export default function ResultsSection({ results }: { results: ResultItem[] }) {
           background-color: #f3f3f3;
           border: none;
           cursor: pointer;
+          color : black;
         }
 
         .card-header:hover {
