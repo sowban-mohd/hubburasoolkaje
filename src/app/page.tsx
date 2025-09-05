@@ -98,7 +98,6 @@ export default function Home() {
         .header-section {
           text-align: left;
           margin-bottom: 2rem;
-           padding-top: 2rem;
         }
 
         .main-title {
@@ -142,6 +141,13 @@ export default function Home() {
         .theme-toggle:hover {
           transform: scale(1.1);
         }
+
+          @media (max-width: 768px) {
+    .header-section {
+      padding-top: 3rem; /* Adjust as needed */
+    }
+  }
+
       `}</style>
     </main>
   );
