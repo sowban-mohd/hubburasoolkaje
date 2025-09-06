@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "@/services/firebase";
 import ScoreCard from "@/components/score_card";
 import ResultsSection from "@/components/result_section";
@@ -23,10 +23,13 @@ export default function Home() {
   const [results, setResults] = useState<ResultItem[]>([]);
   const [scores, setScores] = useState<Record<string, number>>({});
   const [darkMode, setDarkMode] = useState(true);
+  const resultsRef = collection(db, "results");
+  const resultsQuery = query(resultsRef, orderBy("addedAt", "desc"));
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "results"), (snapshot) => {
-      const data: ResultItem[] = snapshot.docs.map((doc) => doc.data() as ResultItem).reverse();
+    const unsubscribe = onSnapshot(resultsQuery, (snapshot) => {
+      const data: ResultItem[] = snapshot.docs.map((doc) => doc.data() as ResultItem);
+
       setResults(data);
 
       const scoreMap: Record<string, number> = {};
