@@ -11,8 +11,8 @@ interface ResultItem {
   category: string;
   competition: string;
   gender?: string;
-  firstPlace: { name: string; team: string };
-  secondPlace: { name: string; team: string };
+  firstPlace: { name?: string; team: string };
+  secondPlace: { name?: string; team: string };
 }
 
 const lexendDeca = Lexend_Deca({
@@ -35,9 +35,9 @@ export default function ResultsSection({ results }: { results: ResultItem[] }) {
       item.competition.toLowerCase().includes(q) ||
       item.category.toLowerCase().includes(q) ||
       (item.gender?.toLowerCase().includes(q) ?? false) ||
-      item.firstPlace.name.toLowerCase().includes(q) ||
+      (item.firstPlace.name?.toLowerCase().includes(q) ?? false) ||
       item.firstPlace.team.toLowerCase().includes(q) ||
-      item.secondPlace.name.toLowerCase().includes(q) ||
+      (item.secondPlace.name?.toLowerCase().includes(q) ?? false) ||
       item.secondPlace.team.toLowerCase().includes(q)
     );
   });
@@ -108,7 +108,7 @@ export default function ResultsSection({ results }: { results: ResultItem[] }) {
                   <div className="place second">
                     <Image src={secondPlaceImg} alt="Second place" width={25} height={40} />
                     <div>
-                      <div className="name">{item.secondPlace.name}</div>
+                      <div className="name">{item.secondPlace.name ? item.secondPlace.name : `Team ${item.secondPlace.team}`}</div>
                       <div className="team">{item.secondPlace.team}</div>
                     </div>
                   </div>
