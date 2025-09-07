@@ -195,7 +195,7 @@ export default function ResultsSection({ results }: { results: ResultItem[] }) {
 
         .results-count {
   font-size: 0.9rem;
-  color: #d1d5db;
+  color: var(--text-secondary);
   font-weight: 400;
   margin-top: -0.8rem;
 }
@@ -223,8 +223,6 @@ export default function ResultsSection({ results }: { results: ResultItem[] }) {
         .arrow.expanded {
           transform: rotate(180deg);
         }
-
-        
 
         .card-body {
           padding: 0.75rem 1rem;
@@ -255,6 +253,7 @@ export default function ResultsSection({ results }: { results: ResultItem[] }) {
           color: #6b7280;
           padding: 1rem 0;
         }
+}
       `}</style>
     </div>
   );

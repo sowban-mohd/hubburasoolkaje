@@ -155,12 +155,14 @@ export default function Home() {
           --bg-color: #fefefe;
           --text-color: #111;
           --card-bg: #fff;
+          --text-secondary: #4b5563; 
         }
 
         .home.dark {
           --bg-color: #111;
           --text-color: #fefefe;
           --card-bg: #1e1e1e;
+          --text-secondary: #9ca3af
         }
 
         .home {
