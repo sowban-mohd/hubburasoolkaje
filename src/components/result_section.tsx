@@ -46,17 +46,12 @@ export default function ResultsSection({ results }: { results: ResultItem[] }) {
     <div className="results-section">
       <div className="header">
         {!searchOpen ? (
-          <>
-            <h2 className={lexendDeca.className}>
-              Announced Results{" "}
-              <span className="results-count">
-                ({results.length} / 106)
-              </span>
-            </h2>
-            <button className="search-btn" onClick={() => setSearchOpen(true)}>
-              <FiSearch size={20} />
-            </button>
-          </>
+          <div className="title-container">
+            <h2 className={lexendDeca.className}>Announced Results</h2>
+            <div className="results-count">
+              ({results.length} / 106)
+            </div>
+          </div>
         ) : (
           <div className="search-container">
             <input
@@ -77,7 +72,14 @@ export default function ResultsSection({ results }: { results: ResultItem[] }) {
             </button>
           </div>
         )}
+
+        {!searchOpen && (
+          <button className="search-btn" onClick={() => setSearchOpen(true)}>
+            <FiSearch size={20} />
+          </button>
+        )}
       </div>
+
 
       {filteredResults.length === 0 ? (
         <p className="no-results">No results found.</p>
@@ -186,10 +188,16 @@ export default function ResultsSection({ results }: { results: ResultItem[] }) {
           overflow: hidden;
         }
 
+        .title-container {
+  display: flex;
+  flex-direction: column;
+}
+
         .results-count {
-  font-size: 1rem; /* slightly smaller */
-  color: #d1d5db; /* gray */
+  font-size: 0.9rem;
+  color: #d1d5db;
   font-weight: 400;
+  margin-top: -0.8rem;
 }
 
         .card-header {
