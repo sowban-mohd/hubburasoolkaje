@@ -93,7 +93,7 @@ export default function ResultsSection({ results }: { results: ResultItem[] }) {
                   <div className="place">
                     <Image src={firstPlaceImg} alt="First place" width={25} height={40} />
                     <div>
-                      <div className="name">{item.firstPlace.name}</div>
+                      <div className="name">{item.firstPlace.name ? item.firstPlace.name : `Team ${item.firstPlace.team}`}</div>
                       <div className="team">{item.firstPlace.team}</div>
                     </div>
                   </div>
