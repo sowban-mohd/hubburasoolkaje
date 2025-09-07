@@ -47,7 +47,12 @@ export default function ResultsSection({ results }: { results: ResultItem[] }) {
       <div className="header">
         {!searchOpen ? (
           <>
-            <h2 className={lexendDeca.className}>Announced Results</h2>
+            <h2 className={lexendDeca.className}>
+              Announced Results{" "}
+              <span className="results-count">
+                ({results.length} / 106)
+              </span>
+            </h2>
             <button className="search-btn" onClick={() => setSearchOpen(true)}>
               <FiSearch size={20} />
             </button>
@@ -180,6 +185,12 @@ export default function ResultsSection({ results }: { results: ResultItem[] }) {
           border-radius: 0.5rem;
           overflow: hidden;
         }
+
+        .results-count {
+  font-size: 1rem; /* slightly smaller */
+  color: #d1d5db; /* gray */
+  font-weight: 400;
+}
 
         .card-header {
           width: 100%;
