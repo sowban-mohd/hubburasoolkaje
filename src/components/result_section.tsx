@@ -90,7 +90,7 @@ export default function ResultsSection({ results }: { results: ResultItem[] }) {
               <button className="card-header" onClick={() => toggleExpand(index)}>
                 <span>
                   {item.competition} - {item.category}
-                  {item.gender ? ` (${item.gender})` : ""}
+                  {item.gender === "Girls" ? ` (${item.gender})` : ""}
                 </span>
                 <span className={`arrow ${expandedIndex === index ? "expanded" : ""}`}>▼</span>
               </button>
