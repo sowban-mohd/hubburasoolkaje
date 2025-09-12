@@ -39,7 +39,6 @@ export default function Home() {
     }
 
     if (data) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const parsedData: ResultItem[] = data.map((item) => ({
         category: item.category,
         competition: item.competition,
