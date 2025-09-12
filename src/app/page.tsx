@@ -39,13 +39,14 @@ export default function Home() {
     }
 
     if (data) {
-      const parsedData: ResultItem[] = data.map((item) => ({
-        category: item.category,
-        competition: item.competition,
-        gender: item.gender,
-        firstPlace: item.first_place || null,
-        secondPlace: item.second_place || null,
+      const parsedData: ResultItem[] = data.map((item: Record<string, unknown>) => ({
+        category: item["category"] as string,
+        competition: item["competition"] as string,
+        gender: item["gender"] as string,
+        firstPlace: item["first_place"] as { name: string; team: string },
+        secondPlace: item["second_place"] as { name: string; team: string },
       }));
+
 
       setResults(parsedData);
       updateScores(parsedData);
