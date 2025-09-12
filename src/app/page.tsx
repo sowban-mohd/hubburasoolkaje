@@ -39,7 +39,7 @@ export default function Home() {
     }
 
     if (data) {
-      const parsedData: ResultItem[] = data.map((item: any) => ({
+      const parsedData: ResultItem[] = data.map((item) => ({
         category: item.category,
         competition: item.competition,
         gender: item.gender,
