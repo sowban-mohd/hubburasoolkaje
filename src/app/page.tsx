@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
-import { db } from "@/services/firebase";
+import { supabase } from "@/services/supabase";
 import logoImg from "@/public/logo.png";
 import ScoreCard from "@/components/score_card";
 import ResultsSection from "@/components/result_section";
@@ -12,7 +11,7 @@ import { FiSun, FiMoon } from "react-icons/fi";
 interface ResultItem {
   category: string;
   competition: string;
-  gender?: string;
+  gender: string;
   firstPlace: { name: string; team: string };
   secondPlace: { name: string; team: string };
 }
@@ -27,33 +26,75 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [loadingPercent, setLoadingPercent] = useState(0);
 
-  const resultsRef = collection(db, "results");
-  const resultsQuery = query(resultsRef, orderBy("addedAt", "desc"));
+  // Fetch initial data ordered by announced_at
+  const fetchResults = async () => {
+    const { data, error } = await supabase
+      .from("announced_results")
+      .select("*")
+      .order("announced_at", { ascending: false });
 
-  useEffect(() => {
-    const unsubscribe = onSnapshot(resultsQuery, (snapshot) => {
-      const data: ResultItem[] = snapshot.docs.map(
-        (doc) => doc.data() as ResultItem
-      );
+    if (error) {
+      console.error("Error fetching results:", error.message);
+      return;
+    }
 
-      setResults(data);
+    if (data) {
+      const parsedData: ResultItem[] = data.map((item: any) => ({
+        category: item.category,
+        competition: item.competition,
+        gender: item.gender,
+        firstPlace: item.first_place || null,
+        secondPlace: item.second_place || null,
+      }));
 
-      const scoreMap: Record<string, number> = {};
-      data.forEach((r) => {
-        scoreMap[r.firstPlace.team] = (scoreMap[r.firstPlace.team] || 0) + 10;
-        scoreMap[r.secondPlace.team] = (scoreMap[r.secondPlace.team] || 0) + 5;
-      });
-      setScores(scoreMap);
+      setResults(parsedData);
+      updateScores(parsedData);
 
+      // Simulate loading bar finishing
       setTimeout(() => {
         setLoadingPercent(100);
         setTimeout(() => setLoading(false), 500);
       }, 500);
+    }
+  };
+
+  // Update team scores based on first and second place
+  const updateScores = (data: ResultItem[]) => {
+    const scoreMap: Record<string, number> = {};
+
+    data.forEach((r) => {
+      if (r.firstPlace?.team) {
+        scoreMap[r.firstPlace.team] = (scoreMap[r.firstPlace.team] || 0) + 10;
+      }
+      if (r.secondPlace?.team) {
+        scoreMap[r.secondPlace.team] = (scoreMap[r.secondPlace.team] || 0) + 5;
+      }
     });
 
-    return () => unsubscribe();
+    setScores(scoreMap);
+  };
+
+  // Subscribe to real-time updates
+  useEffect(() => {
+    fetchResults();
+
+    const channel = supabase
+      .channel("announced_results_stream")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "announced_results" },
+        () => {
+          fetchResults(); // Refetch whenever the table changes
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
+  // Loading bar progress animation
   useEffect(() => {
     if (!loading) return;
 
@@ -111,14 +152,14 @@ export default function Home() {
       )}
 
       <style jsx>{`
-       :global(body) {
-  margin: 0 auto;
-      }
+        :global(body) {
+          margin: 0 auto;
+        }
 
-            .loading-screen {
+        .loading-screen {
           position: fixed;
           inset: 0;
-          background: #111; /* Dark background */
+          background: #111;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -155,14 +196,14 @@ export default function Home() {
           --bg-color: #fefefe;
           --text-color: #111;
           --card-bg: #fff;
-          --text-secondary: #4b5563; 
+          --text-secondary: #4b5563;
         }
 
         .home.dark {
           --bg-color: #111;
           --text-color: #fefefe;
           --card-bg: #1e1e1e;
-          --text-secondary: #9ca3af
+          --text-secondary: #9ca3af;
         }
 
         .home {
@@ -194,7 +235,6 @@ export default function Home() {
           margin-bottom: 2rem;
         }
 
-        /* Theme toggle button */
         .theme-toggle {
           position: absolute;
           top: 1rem;
@@ -219,7 +259,7 @@ export default function Home() {
 
         @media (max-width: 768px) {
           .header-section {
-            padding-top: 3rem; /* Adjust as needed */
+            padding-top: 3rem;
           }
         }
       `}</style>
