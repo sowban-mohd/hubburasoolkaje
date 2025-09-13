@@ -6,7 +6,7 @@ import logoImg from "@/public/logo.png";
 import ScoreCard from "@/components/score_card";
 import ResultsSection from "@/components/result_section";
 import { Luxurious_Roman, Zain } from "next/font/google";
-import { FiSun, FiMoon } from "react-icons/fi";
+import { FiSun, FiMoon, FiFilter } from "react-icons/fi";
 
 interface ResultItem {
   category: string;
@@ -26,6 +26,39 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [loadingPercent, setLoadingPercent] = useState(0);
 
+  // Filters
+  const allCategories = [
+    "Kiddies",
+    "Sub Junior",
+    "Junior",
+    "Senior",
+    "Super Senior",
+    "Super Senior Degree",
+    "General",
+    "Old Students General",
+    "Old Students Senior",
+    "Old Students Junior",
+  ];
+
+  const allGenders = ["Boys", "Girls"];
+
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([
+    ...allCategories,
+  ]);
+  const [selectedGenders, setSelectedGenders] = useState<string[]>([
+    ...allGenders,
+  ]);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+
+  // Helper toggles for Select/Deselect All
+  const isAllCategoriesSelected =
+    selectedCategories.length === allCategories.length &&
+    allCategories.every((c) => selectedCategories.includes(c));
+
+  const isAllGendersSelected =
+    selectedGenders.length === allGenders.length &&
+    allGenders.every((g) => selectedGenders.includes(g));
+
   // Fetch initial data ordered by announced_at
   const fetchResults = async () => {
     const { data, error } = await supabase
@@ -39,19 +72,19 @@ export default function Home() {
     }
 
     if (data) {
-      const parsedData: ResultItem[] = data.map((item: Record<string, unknown>) => ({
-        category: item["category"] as string,
-        competition: item["competition"] as string,
-        gender: item["gender"] as string,
-        firstPlace: item["first_place"] as { name: string; team: string },
-        secondPlace: item["second_place"] as { name: string; team: string },
-      }));
-
+      const parsedData: ResultItem[] = data.map(
+        (item: Record<string, unknown>) => ({
+          category: item["category"] as string,
+          competition: item["competition"] as string,
+          gender: item["gender"] as string,
+          firstPlace: item["first_place"] as { name: string; team: string },
+          secondPlace: item["second_place"] as { name: string; team: string },
+        })
+      );
 
       setResults(parsedData);
       updateScores(parsedData);
 
-      // Simulate loading bar finishing
       setTimeout(() => {
         setLoadingPercent(100);
         setTimeout(() => setLoading(false), 500);
@@ -75,6 +108,25 @@ export default function Home() {
     setScores(scoreMap);
   };
 
+  // Get filtered results
+  const getFilteredResults = () => {
+    return results.filter(
+      (r) =>
+        selectedCategories.includes(r.category) &&
+        selectedGenders.includes(r.gender)
+    );
+  };
+
+  const applyFilter = () => {
+    updateScores(getFilteredResults());
+    setShowFilterModal(false);
+  };
+
+  const resetFilters = () => {
+    setSelectedCategories([...allCategories]);
+    setSelectedGenders([...allGenders]);
+  };
+
   // Subscribe to real-time updates
   useEffect(() => {
     fetchResults();
@@ -85,7 +137,7 @@ export default function Home() {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "announced_results" },
         () => {
-          fetchResults(); // Refetch whenever the table changes
+          fetchResults();
         }
       )
       .subscribe();
@@ -116,19 +168,21 @@ export default function Home() {
       {loading ? (
         <div className="loading-screen">
           <div className="loading-content">
-            <img
-              src={logoImg.src}
-              alt="Loading Logo"
-              className="loading-logo"
-            />
+            <img src={logoImg.src} alt="Loading Logo" className="loading-logo" />
             <p className="loading-text">{loadingPercent}%</p>
           </div>
         </div>
       ) : (
         <>
-          <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
-          </button>
+          {/* Theme and Filter Buttons */}
+          <div className="top-right-buttons">
+            <button className="filter-toggle" onClick={() => setShowFilterModal(true)}>
+              <FiFilter size={20} />
+            </button>
+            <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
+              {darkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
+            </button>
+          </div>
 
           <div className="header-section">
             <h1 className={`${luxurios_roman.className} main-title`}>
@@ -147,9 +201,103 @@ export default function Home() {
           </div>
 
           <div className="results-wrapper">
-            <ResultsSection results={results} />
+            <ResultsSection results={getFilteredResults()} />
           </div>
         </>
+      )}
+
+      {/* Filter Modal */}
+      {showFilterModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h2>Filter Results</h2>
+              <button onClick={resetFilters} className="reset-btn">
+                Reset
+              </button>
+            </div>
+
+            {/* Category Section */}
+            <div className="filter-section">
+              <div className="section-header">
+                <h3>Category</h3>
+                <button
+                  onClick={() =>
+                    isAllCategoriesSelected
+                      ? setSelectedCategories([])
+                      : setSelectedCategories([...allCategories])
+                  }
+                  className="select-all-btn"
+                >
+                  {isAllCategoriesSelected ? "Deselect All" : "Select All"}
+                </button>
+              </div>
+              <div className="options-grid">
+                {allCategories.map((cat) => (
+                  <button
+                    key={cat}
+                    className={`option-btn ${selectedCategories.includes(cat) ? "selected" : ""
+                      }`}
+                    onClick={() =>
+                      setSelectedCategories((prev) =>
+                        prev.includes(cat)
+                          ? prev.filter((c) => c !== cat)
+                          : [...prev, cat]
+                      )
+                    }
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Gender Section */}
+            <div className="filter-section">
+              <div className="section-header">
+                <h3>Gender</h3>
+                <button
+                  onClick={() =>
+                    isAllGendersSelected
+                      ? setSelectedGenders([])
+                      : setSelectedGenders([...allGenders])
+                  }
+                  className="select-all-btn"
+                >
+                  {isAllGendersSelected ? "Deselect All" : "Select All"}
+                </button>
+              </div>
+              <div className="options-grid">
+                {allGenders.map((gen) => (
+                  <button
+                    key={gen}
+                    className={`option-btn ${selectedGenders.includes(gen) ? "selected" : ""
+                      }`}
+                    onClick={() =>
+                      setSelectedGenders((prev) =>
+                        prev.includes(gen)
+                          ? prev.filter((g) => g !== gen)
+                          : [...prev, gen]
+                      )
+                    }
+                  >
+                    {gen}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="modal-footer">
+              <button className="cancel-btn" onClick={() => setShowFilterModal(false)}>
+                Cancel
+              </button>
+              <button className="save-btn" onClick={applyFilter}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <style jsx>{`
@@ -198,6 +346,8 @@ export default function Home() {
           --text-color: #111;
           --card-bg: #fff;
           --text-secondary: #4b5563;
+          --option-selected: #16a34a;
+          --option-unselected: #d1d5db;
         }
 
         .home.dark {
@@ -205,6 +355,8 @@ export default function Home() {
           --text-color: #fefefe;
           --card-bg: #1e1e1e;
           --text-secondary: #9ca3af;
+          --option-selected: #16a34a;
+          --option-unselected: #374151;
         }
 
         .home {
@@ -236,10 +388,16 @@ export default function Home() {
           margin-bottom: 2rem;
         }
 
-        .theme-toggle {
+        .top-right-buttons {
           position: absolute;
           top: 1rem;
           right: 1rem;
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .theme-toggle,
+        .filter-toggle {
           width: 2.5rem;
           height: 2.5rem;
           display: flex;
@@ -254,14 +412,105 @@ export default function Home() {
           transition: background 0.3s, color 0.3s, transform 0.2s;
         }
 
-        .theme-toggle:hover {
+        .theme-toggle:hover,
+        .filter-toggle:hover {
           transform: scale(1.1);
         }
 
-        @media (max-width: 768px) {
-          .header-section {
-            padding-top: 3rem;
-          }
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10000;
+        }
+
+        .modal {
+          background: var(--card-bg);
+          color: var(--text-color);
+          padding: 1.5rem;
+          border-radius: 10px;
+          width: 90%;
+          max-width: 500px;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .reset-btn,
+        .select-all-btn {
+          background: transparent;
+          border: 1px solid var(--text-secondary);
+          padding: 0.25rem 0.5rem;
+          border-radius: 5px;
+          cursor: pointer;
+          color: var(--text-color);
+        }
+
+        .filter-section {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .options-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+          gap: 0.5rem;
+        }
+
+        .option-btn {
+          padding: 0.5rem;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          background: var(--option-unselected);
+          color: var(--text-color);
+          transition: background 0.3s;
+        }
+
+        .option-btn.selected {
+          background: var(--option-selected);
+          color: #fff;
+        }
+
+        .modal-footer {
+          display: flex;
+          justify-content: flex-end;
+          gap: 1rem;
+        }
+
+        .cancel-btn,
+        .save-btn {
+          padding: 0.5rem 1rem;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+
+        .cancel-btn {
+          background: var(--option-unselected);
+          color: var(--text-color);
+        }
+
+        .save-btn {
+          background: var(--option-selected);
+          color: #fff;
         }
       `}</style>
     </main>
