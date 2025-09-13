@@ -49,7 +49,7 @@ export default function ResultsSection({ results }: { results: ResultItem[] }) {
           <div className="title-container">
             <h2 className={lexendDeca.className}>Announced Results</h2>
             <div className="results-count">
-              ({results.length} / 108)
+              ({results.length} / 107)
             </div>
           </div>
         ) : (
