@@ -139,6 +139,10 @@ export default function Home() {
         () => {
           fetchResults();
         }
+      ).on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'announced_results' },
+        () => fetchResults()
       )
       .subscribe();
 
