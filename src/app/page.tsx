@@ -83,7 +83,7 @@ export default function Home() {
       .channel("announced_results_stream")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "announced_results" },
+        { event: "INSERT", schema: "public", table: "announced_results" },
         () => {
           fetchResults(); // Refetch whenever the table changes
         }
