@@ -26,7 +26,73 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [loadingPercent, setLoadingPercent] = useState(0);
 
-  // Filters
+  const [serverDown, setServerDown] = useState(true);
+
+  if (serverDown) {
+    return (
+      <main className="error-screen">
+        <div className="error-box">
+          <h1>500 Internal Server Error</h1>
+          <pre>
+            {`Error: Failed to fetch data from API endpoint.
+          
+  at fetchResults (/app/services/supabase.js:42:17)
+  at processTicksAndRejections (node:internal/process/task_queues:96:5)
+  at async useEffect (/app/page.tsx:89:9)
+          
+Status: 500 INTERNAL SERVER ERROR
+Timestamp: ${new Date().toISOString()}
+Request ID: srv-${Math.random().toString(36).substring(2, 12)}`}
+          </pre>
+          <p className="hint-text">
+            Please try again later or contact your system administrator.
+          </p>
+        </div>
+
+        <style jsx>{`
+        .error-screen {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          background: #0d0d0d;
+          padding: 20px;
+        }
+        .error-box {
+          background: #1a1a1a;
+          border: 1px solid #333;
+          color: #f5f5f5;
+          font-family: monospace;
+          padding: 24px;
+          max-width: 800px;
+          width: 100%;
+          border-radius: 8px;
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+        h1 {
+          font-size: 1.8rem;
+          color: #ff5555;
+          margin-bottom: 16px;
+        }
+        pre {
+          background: #111;
+          padding: 16px;
+          font-size: 0.9rem;
+          overflow-x: auto;
+          border-radius: 6px;
+          margin-bottom: 12px;
+          line-height: 1.4;
+        }
+        .hint-text {
+          font-size: 0.85rem;
+          color: #999;
+          text-align: center;
+        }
+      `}</style>
+      </main>
+    );
+  }
+
   const allCategories = [
     "Kiddies",
     "Sub Junior",
@@ -50,7 +116,6 @@ export default function Home() {
   ]);
   const [showFilterModal, setShowFilterModal] = useState(false);
 
-  // Helper toggles for Select/Deselect All
   const isAllCategoriesSelected =
     selectedCategories.length === allCategories.length &&
     allCategories.every((c) => selectedCategories.includes(c));
@@ -139,9 +204,10 @@ export default function Home() {
         () => {
           fetchResults();
         }
-      ).on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'announced_results' },
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "announced_results" },
         () => fetchResults()
       )
       .subscribe();
@@ -304,6 +370,7 @@ export default function Home() {
         </div>
       )}
 
+      {/* Styles */}
       <style jsx>{`
         :global(body) {
           margin: 0 auto;
