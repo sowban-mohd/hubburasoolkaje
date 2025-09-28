@@ -26,7 +26,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [loadingPercent, setLoadingPercent] = useState(0);
 
-  const [serverDown, setServerDown] = useState(true);
+  const [serverDown, setServerDown] = useState(false);
 
   const allCategories = [
     "Kiddies",
